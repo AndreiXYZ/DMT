@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.svm import SVR
 import numpy as np
 
-df = pickle.load( open( "datasets-per-pacient/processed_df_AS14.01.pkl", "rb" ) )
+df = pickle.load( open( "datasets-per-pacient/processed_df_all_pacients.pkl", "rb" ) )
 print(df)
 preprocessed=df.drop(['time','mood'],axis=1).rolling(6).mean().join(df['mood']).dropna()
 print(preprocessed)
