@@ -3,6 +3,8 @@ import pickle
 from sklearn import svm
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVR
+import matplotlib.pyplot as plt
+import seaborn as sns
 import numpy as np
 
 df = pickle.load( open( "datasets-per-pacient/processed_df_all_pacients.pkl", "rb" ) )
@@ -21,3 +23,9 @@ print('pred',pred)
 actual=ytest.values
 print('actual',actual)
 print('mse',np.square(np.subtract(actual,pred)).mean())
+#corr_matrix = preprocessed.corr()
+#sns.heatmap(corr_matrix, 
+#			xticklabels=corr_matrix.columns.values,
+# 			yticklabels=corr_matrix.columns.values)
+#plt.show()
+#print(corr_matrix['mood'])
