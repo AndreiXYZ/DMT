@@ -11,9 +11,15 @@ runsPerPatient=100
 for file in os.listdir("datasets-per-pacient"):
 	if 'AS' in file:
 		df = pickle.load( open("datasets-per-pacient/"+file, "rb" ) )
-		#print(df)
 		preprocessed=df.drop(['time','mood'],axis=1).rolling(6).mean().join(df['mood']).dropna()
-		#print(preprocessed)
+		cor=preprocessed.corr()
+		cor=cor['mood']
+		drop=[]
+		for idx,c in enumerate(cor):
+			if np.abs(c)<0.05:
+				drop.append(idx)
+		print(len(drop))
+		preprocessed=preprocessed.drop(preprocessed.columns[drop],axis=1)
 		X=preprocessed.drop(['mood'],axis=1)
 		y=preprocessed['mood']
 		#totalmse=0
