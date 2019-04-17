@@ -9,15 +9,15 @@ def convertToDatetime(dateString):
 	dateString = dateString.split(' ')[0]
 	return pd.to_datetime(dateString, format='%Y-%m-%d')
 
-df = pd.read_csv('dataset_mood_smartphone.csv')
-df.rename(columns={'Unnamed: 0' : 'row'}, inplace=True)
+original_df = pd.read_csv('dataset_mood_smartphone.csv')
+original_df.rename(columns={'Unnamed: 0' : 'row'}, inplace=True)
 
 # Select just one patient for now
-ids = df['id'].unique()
+ids = original_df['id'].unique()
 
 
 for id in ids:
-	df = df[ df['id'] == id]
+	df = original_df.copy(deep=True)[ original_df['id'] == id]
 	# Store the means for mood, arousal and valence
 	means = {}
 	means['mood'] = df[ df['variable']=='mood'].mean().iloc[1]
@@ -31,10 +31,7 @@ for id in ids:
 	sms_calls = df[ (df['variable']=='sms') | (df['variable']=='call') ].groupby(['variable', 'time'], as_index=False).sum()
 	meaned_values = df[ (df['variable']!='sms') & (df['variable'] != 'call') ].groupby(['variable', 'time'], as_index=False).mean()
 
-
-	# print(df.groupby(['variable', 'time'], as_index=False).mean())
 	fulldf = pd.concat([sms_calls, meaned_values], keys='time').reset_index().drop(['level_0', 'level_1', 'row'], axis=1)
-
 
 	dates = sorted(fulldf['time'].unique())
 	vals = fulldf['variable'].unique()
@@ -71,7 +68,6 @@ for id in ids:
 
 	features_df = pd.DataFrame(tempdict)
 
-	print(features_df.head)
 	# corr_matrix = features_df.corr()
 	# sns.heatmap(corr_matrix, 
 	# 			xticklabels=corr_matrix.columns.values,
