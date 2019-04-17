@@ -8,7 +8,6 @@ import os
 import matplotlib.pyplot as plt
 
 mseAllPatients=0
-runsPerPatient=1
 #m=[]
 for file in os.listdir("datasets-per-pacient"):
 	if 'AS' in file:
@@ -26,26 +25,30 @@ for file in os.listdir("datasets-per-pacient"):
 		y=preprocessed['mood']
 		X=X.to_numpy(copy=True)
 		y=y.to_numpy(copy=True)
-		daystopred=1
-		xtrain=X[0:-daystopred]
-		xtest=X[-daystopred:]
-		ytrain=y[0:-daystopred]
-		ytest=y[-daystopred:]
-		#totalmse=0
-		for i in range(runsPerPatient):
-			#xtrain,xtest,ytrain,ytest=train_test_split(X,y,test_size=0.20)
+		daystopred=10
+		preds=[]
+		for i in reversed(range(1,daystopred+1)):
+			xtrain=X[0:-i]
+			xtest=X[-i:]
+			ytrain=y[0:-i]
+			ytest=y[-i:]
 			classifier=SVR(kernel='rbf',degree=2,gamma='auto')
 			classifier.fit(xtrain,ytrain)
-			pred=classifier.predict(xtest)
-			actual=ytest
-			mse=np.square(np.subtract(actual,pred)).mean()
-			mseAllPatients+=mse
-			plt.plot(np.append(ytrain,pred),'r')
-			plt.plot(y,'b')
-			plt.show()
+			#print(xtest)
+			#print(xtest[0])
+			#print(classifier.predict(xtest[0]))
+			preds.append(classifier.predict([xtest[0]]))
+			#actual=ytest[0]
+		mse=np.square(np.subtract(y[-daystopred:],preds)).mean()
+		mseAllPatients+=mse
+		#print(y[-daystopred:])
+		#print(preds)
+		plt.plot(np.append(y[0:-daystopred],preds),'r')
+		plt.plot(y,'b')
+		plt.show()
 			#totalmse+=mse
 		#m.append(totalmse/runsPerPatient)
 		#print(totalmse/runsPerPatient,file)
-print(mseAllPatients/(27*runsPerPatient))
+print(mseAllPatients/27)
 #plt.hist(m)
 #plt.show()
