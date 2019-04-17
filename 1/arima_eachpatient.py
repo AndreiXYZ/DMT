@@ -9,13 +9,15 @@ from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from statsmodels.tsa.arima_model import ARIMA
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
-from pmdarima import auto_arima
+from pyramid.arima import auto_arima
 
 
 rootdir = 'datasets-per-pacient'
 mse_all = []
+pacient_indexes = []
 
 for findex,filename in enumerate(os.listdir(rootdir)):
+	skip = 0
 	if 'all' in filename:
 		continue
 
@@ -29,6 +31,8 @@ for findex,filename in enumerate(os.listdir(rootdir)):
 	cor = df.corr()
 	cor=cor['mood']
 	drop=[]
+
+
 	for idx,c in enumerate(cor):
 			if np.abs(c)<0.05:
 				drop.append(idx)
@@ -39,7 +43,9 @@ for findex,filename in enumerate(os.listdir(rootdir)):
 	exog_labels = df.columns.tolist()
 	exog_labels.remove('mood')
 	endog_labels = 'mood'
-	train, test = train_test_split(df, train_size=0.8 ,shuffle=False)
+
+	# Keep last 10 days for testing our rolling prediction
+	train, test = train_test_split(df, train_size=df.shape[0]-10 ,shuffle=False)
 
 	# Create training and testing sets as np arrays
 	x_train, y_train = train[exog_labels], train[endog_labels]
@@ -50,18 +56,31 @@ for findex,filename in enumerate(os.listdir(rootdir)):
 	x_test = np.asarray(x_test)
 	y_test = np.asarray(y_test)
 
-	try:
-		model = auto_arima(y=y_train, exogenous=x_train, trace=True, error_action='ignore',
-							   suppress_warnings=True, approx=False, D=1, stationary=False,
-							   max_order=12)
-		model.fit(y_train)
-	except Exception as e:
-		print(e)
+	history = x_train.copy()
+	labels = y_train.copy()
+	forecast = []
+	for t in range(len(x_test)):
 
-	forecast = model.predict(len(x_test))
-	mse = mean_squared_error(forecast, y_test)
-	print('Pacient {} MSE: {}'.format(findex,mse))
-	mse_all.append(mse)
+		try:
+			model = auto_arima(y=y_train, exogenous=x_train, trace=False, error_action='ignore',
+									   suppress_warnings=True, approx=False, stationary=False)
+			model.fit(labels)
+		except Exception as e:
+			print(e)
+			skip = 1
+			continue
+		
+		prediction = model.predict(1)[0]
+		forecast.append(prediction)
+		history = np.append(history, x_test[t][np.newaxis, :], axis=0)
+		labels = np.append(labels, y_test[t])
+		print('Predicted: {} Expected: {}'.format(prediction, y_test[t]))
+
+	if not skip:
+		mse = mean_squared_error(forecast, y_test)
+		print('Pacient {} MSE rolling prediction: {}'.format(findex,mse))
+		mse_all.append(mse)
 
 print(len(mse_all))
 print('Average MSE across all pacients: ', sum(mse_all)/len(mse_all))
+print('Pacients for which arima could not train :', pacient_indexes)
