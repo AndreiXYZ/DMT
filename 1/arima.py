@@ -39,22 +39,26 @@ model = ARIMA(exog=x_train, endog=y_train, order=(5,0,5))
 model_fit = model.fit(max_iter=500, disp=5)
 
 # In sample prediction to get train error
-yhat_train = model_fit.predict(1, dynamic=False)
+yhat_train = model_fit.predict(start=0, dynamic=False)
 
-print('Train MSE :', mean_squared_error(yhat_train, y_train[1:]))
+print('Train MSE :', mean_squared_error(yhat_train, y_train))
 
 yhat_test = model_fit.predict(start=len(x_train), end=len(x_train)+len(x_test)-1,
 												exog=x_test, dynamic=False)
 
-print(yhat_test)
 print('Test MSE :', mean_squared_error(yhat_test, y_test))
-print(yhat_train)
-print(yhat_test)
+
 plt.subplot(2, 1, 1)
 plt.plot(y_train, label='y train')
 plt.plot(yhat_train, label='yhat train')
+plt.grid()
+plt.legend()
+plt.title('In-sample predictions')
 
 plt.subplot(2, 1, 2)
 plt.plot(y_test, label='y test')
 plt.plot(yhat_test, label='yhat test')
+plt.grid()
+plt.legend()
+plt.title('Out of sample forecast')
 plt.show()
