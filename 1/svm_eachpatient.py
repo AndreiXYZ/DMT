@@ -12,7 +12,7 @@ mseAllPatients=0
 for file in os.listdir("datasets-per-pacient"):
 	if 'AS' in file:
 		df = pickle.load( open("datasets-per-pacient/"+file, "rb" ) )
-		preprocessed=df.drop(['time','mood'],axis=1).rolling(6).mean().join(df['mood']).dropna()
+		preprocessed=df.drop(['time','mood'],axis=1).rolling(10).mean().join(df['mood']).dropna()
 		cor=preprocessed.corr()
 		cor=cor['mood']
 		drop=[]
@@ -43,6 +43,7 @@ for file in os.listdir("datasets-per-pacient"):
 		mseAllPatients+=mse
 		#print(y[-daystopred:])
 		#print(preds)
+		plt.ylim(0,10)
 		plt.plot(np.append(y[0:-daystopred],preds),'r')
 		plt.plot(y,'b')
 		plt.show()
