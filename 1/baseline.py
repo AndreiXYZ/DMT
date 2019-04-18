@@ -9,7 +9,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.svm import SVR
 import numpy as np
 
-
 def get_MSE(dataset):
     df = pickle.load(open(dataset, "rb"))
     predictions = []
@@ -33,12 +32,19 @@ def get_MSE(dataset):
     return error
 
 
+
+
 errors = []
 for filename in os.listdir("datasets-per-pacient"):
     error = get_MSE("datasets-per-pacient/" + filename)
     errors.append((error, filename))
 
+with open('mse.pkl', 'wb') as f:
+    pickle.dump(errors, f)
 
+with open('mse.pkl', 'rb') as f:
+    e = pickle.load(f)
+print(e)
 
 for i,error in enumerate(errors):
     if i>0:
@@ -61,3 +67,4 @@ plt.grid()
 plt.legend()
 plt.title('MSE over all datasets')
 plt.show()
+
