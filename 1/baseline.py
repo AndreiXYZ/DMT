@@ -61,7 +61,7 @@ mini = 1000.0
 for i,error in enumerate(errors):
     x.append(error[1])
     y.append(error[0])
-    if i >-1:
+    if i >0:
         mean += y[-1]
         if y[-1] > maxi:
             maxi = y[-1]
@@ -72,8 +72,8 @@ mean /= len(errors)
 
 variance = 0.0
 for i,error in enumerate(errors):
-    if i>-1:
-        variance+= (error[1] -mean)**2
+    if i>0:
+        variance+= (error[0] -mean)**2
 
 variance/= len(errors)
 std_dev = np.sqrt(variance)
@@ -86,4 +86,4 @@ plt.plot(x, y, label='MSE')
 plt.grid()
 plt.legend()
 plt.title('MSE over all datasets')
-plt.show()
+plt.savefig('baseline.png')
