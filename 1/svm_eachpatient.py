@@ -8,7 +8,7 @@ import os
 import matplotlib.pyplot as plt
 
 mseAllPatients=0
-#m=[]
+m=[]
 for file in os.listdir("datasets-per-pacient"):
 	if 'AS' in file:
 		df = pickle.load( open("datasets-per-pacient/"+file, "rb" ) )
@@ -41,15 +41,13 @@ for file in os.listdir("datasets-per-pacient"):
 			#actual=ytest[0]
 		mse=np.square(np.subtract(y[-daystopred:],preds)).mean()
 		mseAllPatients+=mse
-		#print(y[-daystopred:])
-		#print(preds)
-		plt.ylim(0,10)
-		plt.plot(np.append(y[0:-daystopred],preds),'r')
-		plt.plot(y,'b')
-		plt.show()
-			#totalmse+=mse
-		#m.append(totalmse/runsPerPatient)
-		#print(totalmse/runsPerPatient,file)
+		m.append(mse)
+		print(file)
+		#plt.ylim(0,10)
+		#plt.plot(np.append(y[0:-daystopred],preds),'r')
+		#plt.plot(y,'b')
+		#plt.show()
 print(mseAllPatients/27)
-#plt.hist(m)
-#plt.show()
+plt.plot(m)
+plt.show()
+pickle.dump(m,open('mse_svm_per_patient_ascending.pkl','wb'))
