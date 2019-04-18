@@ -15,5 +15,7 @@ plt.plot(svm,'b',label='SVR')
 del base[19]
 del base[17]
 plt.plot([i[0] for i in base],'g',label='Baseline')
+plt.xlabel('patient')
+plt.ylabel('MSE')
 plt.legend()
 plt.show()
