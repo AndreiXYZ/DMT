@@ -16,6 +16,8 @@ rootdir = 'datasets-per-pacient'
 mse_all = []
 pacient_indexes = []
 
+train_data_all = []
+
 for findex,filename in enumerate(os.listdir(rootdir)):
 	skip = 0
 	if 'all' in filename:
@@ -59,16 +61,21 @@ for findex,filename in enumerate(os.listdir(rootdir)):
 	history = x_train.copy()
 	labels = y_train.copy()
 	forecast = []
+	forecasts_all = []
+	labels_all = []
+	train_data_all.append(x_train)
 	for t in range(len(x_test)):
 
 		try:
 			model = auto_arima(y=y_train, exogenous=x_train, trace=False, error_action='ignore',
-									   suppress_warnings=True, approx=False, stationary=False)
+									   suppress_warnings=True, approx=False, stationary=False,
+									   enforce_stationarity=False)
 			model.fit(labels)
 		except Exception as e:
 			print(e)
 			skip = 1
-			continue
+			pacient_indexes.append(filename)
+			break
 		
 		prediction = model.predict(1)[0]
 		forecast.append(prediction)
@@ -80,7 +87,16 @@ for findex,filename in enumerate(os.listdir(rootdir)):
 		mse = mean_squared_error(forecast, y_test)
 		print('Pacient {} MSE rolling prediction: {}'.format(findex,mse))
 		mse_all.append(mse)
+		forecasts_all.append(forecast)
+		labels_all.append(y_test)
 
 print(len(mse_all))
 print('Average MSE across all pacients: ', sum(mse_all)/len(mse_all))
+print('Patients for which arima could not train: ', pacient_indexes)
+with open('mse_all_arima.pkl', 'wb') as f:
+	pickle.dump(mse_all, f)
+
+with open('forecasts_vs_truth_arima.pkl', 'wb') as f:
+	pickle.dump([forecasts_all, labels_all, train_data_all, pacient_indexes], f)
+
 print('Pacients for which arima could not train :', pacient_indexes)
