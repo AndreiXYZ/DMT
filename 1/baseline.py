@@ -36,8 +36,9 @@ def get_MSE(dataset):
 
 errors = []
 for filename in os.listdir("datasets-per-pacient"):
-    error = get_MSE("datasets-per-pacient/" + filename)
-    errors.append((error, filename))
+	if 'AS' in filename:
+		error = get_MSE("datasets-per-pacient/" + filename)
+		errors.append((error, filename))
 
 with open('mse.pkl', 'wb') as f:
     pickle.dump(errors, f)
