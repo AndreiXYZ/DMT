@@ -4,6 +4,7 @@ import statsmodels.api as sm
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import seaborn as sns
 
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
@@ -21,12 +22,18 @@ with open('datasets-per-pacient/processed_df_all_pacients.pkl', 'rb') as f:
 # Drop timestamps since they are no longer needed
 df = df.drop('time', axis=1)
 
+corr_matrix = df.corr()
+sns.heatmap(corr_matrix)
+plt.show()
 # Plot autocorrelation
 
-# plot_acf(df['mood'])
+# plt.subplot(1, 2, 1)
+# plot_acf(df['mood'], lags=25)
 # plt.show()
-
+# plot_pacf(df['mood'], lags=25)
+# plt.show()
 # Split into training and validation
+
 train, test = train_test_split(df, train_size=0.8 ,shuffle=False)
 
 # Prepare exogenous and endogenous labels
@@ -43,7 +50,7 @@ x_test, y_test = test[exog_labels], test[endog_labels]
 x_test = np.asarray(x_test)
 y_test = np.asarray(y_test)
 # Define model
-model = ARIMA(exog=x_train, endog=y_train, order=(5,1,0))
+model = ARIMA(exog=x_train, endog=y_train, order=(2,1,0))
 model_fit = model.fit(max_iter=500, disp=10)
 
 # In sample prediction to get train error
@@ -63,14 +70,14 @@ yhat_test = undifference_result(yhat_test, y_test)
 # yhat_test = undifference_result(yhat_test, y_test)
 print('Test MSE :', mean_squared_error(yhat_test[:-3], y_test[:-3]))
 
-plt.subplot(2, 1, 1)
+plt.subplot(1, 2, 1)
 plt.plot(y_train, label='y train')
 plt.plot(yhat_train, label='yhat train')
 plt.grid()
 plt.legend()
 plt.title('In-sample predictions')
 
-plt.subplot(2, 1, 2)
+plt.subplot(1, 2, 2)
 plt.plot(y_test[:-3], label='y test')
 plt.plot(yhat_test[:-3], label='yhat test')
 plt.grid()
